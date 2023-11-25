@@ -33,15 +33,23 @@ async function run() {
 
 
         // Get All Apartments
-        app.get('/aparts',async(req,res)=>{
+        app.get('/aparts', async (req, res) => {
             const result = await apartCollection.find().toArray()
             res.send(result);
         })
 
         // Post Agreement Collection
-        app.post('/agreements',async(req,res)=>{
+        app.post('/agreements', async (req, res) => {
             const agreement = req.body
             const result = await agreementCollection.insertOne(agreement)
+            res.send(result)
+        })
+
+        // Get Agreement Collection of User
+        app.get('/agreements', async (req, res) => {
+            const email = req.query.email
+            const query = { email: email }
+            const result = await agreementCollection.find(query).toArray();
             res.send(result)
         })
 
