@@ -29,12 +29,20 @@ async function run() {
         await client.connect();
 
         const apartCollection = client.db("gulshanDb").collection("aparts")
+        const agreementCollection = client.db("gulshanDb").collection("agreements")
 
 
         // Get All Apartments
         app.get('/aparts',async(req,res)=>{
             const result = await apartCollection.find().toArray()
             res.send(result);
+        })
+
+        // Post Agreement Collection
+        app.post('/agreements',async(req,res)=>{
+            const agreement = req.body
+            const result = await agreementCollection.insertOne(agreement)
+            res.send(result)
         })
 
         // Send a ping to confirm a successful connection
