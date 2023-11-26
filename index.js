@@ -33,6 +33,7 @@ async function run() {
         const userCollection = client.db("gulshanDb").collection("users")
         const agreementCollection = client.db("gulshanDb").collection("agreements")
         const announcementCollection = client.db("gulshanDb").collection("announcements")
+        const couponCollection = client.db("gulshanDb").collection("coupons")
 
 
 
@@ -142,7 +143,7 @@ async function run() {
             res.send(result)
         })
 
-        // Get Agreement Collection of User
+        // Get Agreement Collection of Specific User
         app.get('/agreements', async (req, res) => {
             const email = req.query.email
             const query = { email: email }
@@ -150,11 +151,17 @@ async function run() {
             res.send(result)
         })
 
+        // Get All Agreements 
+        app.get('/allAgreements', async (req, res) => {
+            const result = await agreementCollection.find().toArray()
+            res.send(result)
+        })
+
 
 
         // ---Announcement Related API--
         // Post a Announcement
-        app.post('/announcements', async (req, res) => {
+        app.post('/announcements', verifyAdmin, verifyToken, async (req, res) => {
             const announcement = req.body
             const result = await announcementCollection.insertOne(announcement)
             res.send(result)
@@ -165,6 +172,19 @@ async function run() {
             const result = await announcementCollection.find().toArray()
             res.send(result)
         })
+
+        // ---Coupons Related API---
+        app.get('/coupons', async (req, res) => {
+            const result = await couponCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/coupons', async (req, res) => {
+            const coupon = req.body
+            const result = await couponCollection.insertOne(coupon)
+            res.send(result)
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
