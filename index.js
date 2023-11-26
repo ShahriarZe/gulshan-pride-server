@@ -32,6 +32,7 @@ async function run() {
         const apartCollection = client.db("gulshanDb").collection("aparts")
         const userCollection = client.db("gulshanDb").collection("users")
         const agreementCollection = client.db("gulshanDb").collection("agreements")
+        const announcementCollection = client.db("gulshanDb").collection("announcements")
 
 
 
@@ -126,6 +127,8 @@ async function run() {
             res.send(result)
         })
 
+
+        // ---Apartments Related API---
         // Get All Apartments
         app.get('/aparts', async (req, res) => {
             const result = await apartCollection.find().toArray()
@@ -144,6 +147,22 @@ async function run() {
             const email = req.query.email
             const query = { email: email }
             const result = await agreementCollection.find(query).toArray();
+            res.send(result)
+        })
+
+
+
+        // ---Announcement Related API--
+        // Post a Announcement
+        app.post('/announcements', async (req, res) => {
+            const announcement = req.body
+            const result = await announcementCollection.insertOne(announcement)
+            res.send(result)
+        })
+
+        // Get all Announcements
+        app.get('/announcements', async (req, res) => {
+            const result = await announcementCollection.find().toArray()
             res.send(result)
         })
 
