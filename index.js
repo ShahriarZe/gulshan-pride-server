@@ -152,7 +152,7 @@ async function run() {
         })
 
         // Get All Agreements 
-        app.get('/allAgreements', async (req, res) => {
+        app.get('/allAgreements', verifyToken, verifyAdmin, async (req, res) => {
             const result = await agreementCollection.find().toArray()
             res.send(result)
         })
