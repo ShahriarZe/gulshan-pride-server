@@ -75,6 +75,17 @@ async function run() {
             next()
         }
 
+        const verifyMember = async (req, res, next) => {
+            const email = req.decoded.email
+            const query = { email: email }
+            const user = await userCollection.findOne(query)
+            const isMember = user?.role === 'Member'
+            if (!isMember) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            next()
+        }
+
         // Users related API
         app.post('/users', async (req, res) => {
             const user = req.body
@@ -108,6 +119,21 @@ async function run() {
             res.send({ admin })
         })
 
+
+        app.get('/users/member/:email',verifyToken, async (req, res) => {
+            const email = req.params.email
+            if (email !== req.decoded.email) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            const query = { email: email }
+            const user = await userCollection.findOne(query)
+            let member = false
+            if (user) {
+                member = user.role == 'Member'
+            }
+            res.send({ member })
+        })
+
         // Delete Users
         app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id
@@ -116,6 +142,8 @@ async function run() {
             res.send(result)
         })
 
+
+        // ---MAKE ADMIN--
         app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
@@ -128,6 +156,19 @@ async function run() {
             res.send(result)
         })
 
+        // ---MAKE MEMBER---
+        app.patch('/users/member/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    role: 'Member',
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
         // ---Apartments Related API---
         // Get All Apartments
