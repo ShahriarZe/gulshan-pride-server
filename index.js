@@ -120,7 +120,7 @@ async function run() {
         })
 
 
-        app.get('/users/member/:email',verifyToken, async (req, res) => {
+        app.get('/users/member/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             if (email !== req.decoded.email) {
                 return res.status(403).send({ message: 'Forbidden Access' })
@@ -195,6 +195,32 @@ async function run() {
         // Get All Agreements 
         app.get('/allAgreements', verifyToken, verifyAdmin, async (req, res) => {
             const result = await agreementCollection.find().toArray()
+            res.send(result)
+        })
+
+        // Update Agreement Status (Checked)
+        app.patch('/allAgreements/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'Checked'
+                }
+            }
+            const result = await agreementCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        // Update Agreement Status (Rejected)
+        app.patch('/allAgreements/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'Rejected'
+                }
+            }
+            const result = await agreementCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
 
