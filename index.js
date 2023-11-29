@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const jwt = require('jsonwebtoken')
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const port = process.env.PORT || 5000;
 
 // Middlewares
@@ -34,6 +36,7 @@ async function run() {
         const agreementCollection = client.db("gulshanDb").collection("agreements")
         const announcementCollection = client.db("gulshanDb").collection("announcements")
         const couponCollection = client.db("gulshanDb").collection("coupons")
+        const paymentCollection = client.db("gulshanDb").collection("payments")
 
 
 
@@ -105,6 +108,7 @@ async function run() {
             res.send(result)
         })
 
+        // Get Admin
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             if (email !== req.decoded.email) {
@@ -119,7 +123,7 @@ async function run() {
             res.send({ admin })
         })
 
-
+        // Get Member
         app.get('/users/member/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             if (email !== req.decoded.email) {
@@ -249,6 +253,30 @@ async function run() {
         app.post('/coupons', async (req, res) => {
             const coupon = req.body
             const result = await couponCollection.insertOne(coupon)
+            res.send(result)
+        })
+
+
+        // ---PAYMENT INTENT---
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body
+            const amount = parseInt(price * 100)
+            console.log('Amount Inside Intent', amount)
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            })
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+        app.post('/payments',async(req,res)=>{
+            const payment = req.body
+            const result = await paymentCollection.insertOne(payment)
             res.send(result)
         })
 
